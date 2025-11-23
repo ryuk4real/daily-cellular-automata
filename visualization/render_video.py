@@ -168,7 +168,7 @@ def create_video(input_folder, output_file='automata.mp4', fps=None, max_frames=
             pass
     
     # Setup figure
-    fig, ax = plt.subplots(figsize=(10, 10))
+    fig, ax = plt.subplots(figsize=(7, 7))
     ax.axis('off')
     
     # Create custom colormap
@@ -249,7 +249,7 @@ def create_video(input_folder, output_file='automata.mp4', fps=None, max_frames=
         extra_args=['-vcodec', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'slow', '-crf', '18']
     )
     
-    anim.save(output_file, writer=writer, dpi=120)
+    anim.save(output_file, writer=writer, dpi=100)
     save_time = time.time() - save_start
     
     total_time = time.time() - start_time

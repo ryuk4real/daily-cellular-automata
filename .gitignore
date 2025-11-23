@@ -4,3 +4,4 @@ venv
 output
 bin
 *.mp4
+cellular-automata/cellular_automata
