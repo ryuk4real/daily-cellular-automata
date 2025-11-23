@@ -89,11 +89,16 @@ def create_video(input_folder, output_file='automata.mp4', fps=None, max_frames=
     if max_frames:
         files = files[:max_frames]
     
-    if duration is not None and fps is None:
-        fps = len(files) / duration
-        print(f"Calculating FPS for {duration}s video: {fps:.2f} fps")
-    elif fps is None:
-        fps = 30
+    # Always target 30 fps and 30 seconds unless specified otherwise
+    target_fps = 30
+    target_duration = duration if duration is not None else 30
+    
+    original_frame_count = len(files)
+    target_frame_count = int(target_fps * target_duration)
+    
+    print(f"Target: {target_duration}s at {target_fps} fps")
+    print(f"Original frames: {original_frame_count}")
+    print(f"Target frame count: {target_frame_count} (LERP interpolation)")
     
     print(f"Loading {len(files)} generations in parallel...")
     load_start = time.time()
@@ -104,16 +109,56 @@ def create_video(input_folder, output_file='automata.mp4', fps=None, max_frames=
         results = pool.map(load_generation_wrapper, tasks)
     
     results.sort(key=lambda x: x[0])
-    frames = [result[1] for result in results]
+    original_frames = [result[1] for result in results]
     
     load_time = time.time() - load_start
     print(f"Loaded all frames in {load_time:.2f} seconds using {num_processes} processes")
     
-    first_frame = frames[0]
-    max_state = max(np.max(frame) for frame in frames)
+    first_frame = original_frames[0]
+    max_state = max(np.max(frame) for frame in original_frames)
     print(f"Grid dimensions: {first_frame.shape}")
-    print(f"Alive cells in first frame: {np.sum(first_frame == 1)}")
     print(f"Max state value: {max_state}")
+
+    # Convert to float representation for display/interpolation
+    print("Converting frames to float representation...")
+    float_frames = []
+    
+    for frame in original_frames:
+        if max_state <= 1:
+            display_frame = frame.astype(float)
+        else:
+            display_frame = np.zeros_like(frame, dtype=float)
+            display_frame[frame == 0] = 0.0
+            display_frame[frame == 1] = 1.0
+            for state in range(2, max_state + 1):
+                blend = 1.0 - ((state - 1) / max_state)
+                display_frame[frame == state] = blend
+        float_frames.append(display_frame)
+
+    # Generate interpolated frames (LERP)
+    print(f"Interpolating from {len(float_frames)} to {target_frame_count} frames...")
+    
+    display_frames = []
+    frame_gen_mapping = []
+    
+    for i in range(target_frame_count):
+        # Map target frame index to source frame index (float)
+        progress = i / max(1, target_frame_count - 1)
+        virtual_idx = progress * (len(float_frames) - 1)
+        
+        idx1 = int(virtual_idx)
+        idx2 = min(idx1 + 1, len(float_frames) - 1)
+        alpha = virtual_idx - idx1
+        
+        # LERP
+        frame1 = float_frames[idx1]
+        frame2 = float_frames[idx2]
+        interpolated = frame1 * (1.0 - alpha) + frame2 * alpha
+        
+        display_frames.append(interpolated)
+        frame_gen_mapping.append(idx1)
+    
+    vmin, vmax = 0, 1
     
     # Set random seed if available
     if seed_val is not None:
@@ -175,20 +220,7 @@ def create_video(input_folder, output_file='automata.mp4', fps=None, max_frames=
     # Create custom colormap
     cmap = create_custom_colormap(alive_color, dead_color)
     
-    if max_state <= 1:
-        display_frames = frames
-        vmin, vmax = 0, 1
-    else:
-        display_frames = []
-        for frame in frames:
-            display_frame = np.zeros_like(frame, dtype=float)
-            display_frame[frame == 0] = 0.0
-            display_frame[frame == 1] = 1.0
-            for state in range(2, max_state + 1):
-                blend = 1.0 - ((state - 1) / max_state)
-                display_frame[frame == state] = blend
-            display_frames.append(display_frame)
-        vmin, vmax = 0, 1
+    # display_frames is already prepared with floats 0.0-1.0
     
     im = ax.imshow(display_frames[0], cmap=cmap, interpolation='nearest', vmin=vmin, vmax=vmax)
     
@@ -199,6 +231,7 @@ def create_video(input_folder, output_file='automata.mp4', fps=None, max_frames=
              ha='center', va='top', fontsize=14, fontweight='normal',
              transform=fig.transFigure)
     
+    # Update stats to show original generation number
     alive_count = np.sum(first_frame == 1)
     stats = ax.text(0.5, -0.05, f'Generation 0 | Alive: {alive_count}',
                    horizontalalignment='center',
@@ -217,33 +250,35 @@ def create_video(input_folder, output_file='automata.mp4', fps=None, max_frames=
     
     def update(frame_idx):
         if frame_idx % 100 == 0 and frame_idx != last_printed[0]:
-            print(f"Processing frame {frame_idx}/{len(files)}")
+            print(f"Processing frame {frame_idx}/{len(display_frames)}")
             last_printed[0] = frame_idx
         
+        # Get original generation number from mapping
+        original_gen = frame_gen_mapping[frame_idx]
+        
         grid = display_frames[frame_idx]
-        alive = np.sum(frames[frame_idx] == 1)
+        # Use the original frame data for stats
+        alive = np.sum(original_frames[original_gen] == 1)
+        
         im.set_array(grid)
-        stats.set_text(f'Generation {frame_idx} | Alive: {alive}')
+        stats.set_text(f'Generation {original_gen} | Alive: {alive}')
         return [im, stats]
     
     print("\nCreating animation...")
     anim = animation.FuncAnimation(
-        fig, update, frames=len(files), 
-        interval=1000/fps, blit=True
+        fig, update, frames=len(display_frames), 
+        interval=1000/target_fps, blit=True
     )
     
     # Ensure output directory exists
     Path(output_file).parent.mkdir(parents=True, exist_ok=True)
     
-    print(f"Saving video to {output_file} ({fps:.2f} fps, ~{len(files)/fps:.1f}s duration)...")
+    print(f"Saving video to {output_file} ({target_fps} fps, {len(display_frames)/target_fps:.1f}s duration)...")
     save_start = time.time()
     
     # Configure writer for lighter file size (<10MB)
-    # - bitrate=1500: Target ~5.5MB for 30s video
-    # - crf=28: Higher value = more compression (standard range 18-28)
-    # - preset=veryslow: Maximum compression efficiency
     writer = animation.FFMpegWriter(
-        fps=fps,
+        fps=target_fps,
         metadata=dict(artist='Daily Cellular Automata'),
         bitrate=1500,
         extra_args=['-vcodec', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'veryslow', '-crf', '28']
