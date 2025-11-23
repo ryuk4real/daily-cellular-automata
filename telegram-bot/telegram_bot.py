@@ -38,15 +38,13 @@ def parse_rule_from_logs():
 def format_caption(rule, generations, neighborhood, colors_alive, colors_dead, activity):
 
     # Parse neighborhood from rule
-    if "NM" in rule:
-        neighborhood_full = "Moore"
-        neighborhood_short = "NM"
-    elif "NN" in rule:
+    if "NN" in rule:
         neighborhood_full = "Von Neumann"
         neighborhood_short = "NN"
     else:
-        neighborhood_full = "Unknown"
-        neighborhood_short = "?"
+        # Default to Moore if omitted or explicitly NM
+        neighborhood_full = "Moore"
+        neighborhood_short = "NM"
     
     # Determine activity type
     activity_type = "Dynamic"
@@ -61,12 +59,11 @@ def format_caption(rule, generations, neighborhood, colors_alive, colors_dead, a
     except ValueError:
         activity_type = "Unknown"
     
-    caption = f"""**> Daily Cellular Automata**
-                    **Rule:** `{rule}`
-                    **Generations:** {generations}
-                    **Neighborhood:** {neighborhood_full} ({neighborhood_short})
-                    **Activity Score:** {activity} ({activity_type})
-                    **Colors:** {colors_alive} (alive) - {colors_dead} (dead)
+    caption = f"""**Rule:** `{rule}`\n
+**Generations:** {generations}
+**Neighborhood:** {neighborhood_full} ({neighborhood_short})
+**Activity Score:** {activity} ({activity_type})
+**Colors:** {colors_alive} (alive) - {colors_dead} (dead)
                 """
     return caption
 
