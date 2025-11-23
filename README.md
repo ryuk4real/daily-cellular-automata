@@ -2,6 +2,22 @@
 
 Generates unique cellular automata patterns daily using HROT notation and posts the generated video to the [Daily Cellular Automata](https://t.me/daily_cellular_automata) Telegram channel.
 
+## Post preview
+https://github.com/user-attachments/assets/c4e609ef-a91e-4f43-a8ee-4fa5b85ec16e
+
+Rule: R4,C6,S1,5-6,8,16,20,22,40-41,48,51,56-57,66,71-72,B9,12-13,28,32,36,39,49-50,54,63-64,73,80
+
+📐 Specifications:
+- Radius: 4
+- States: 6 (multi-state)
+- Neighborhood: Moore (NM)
+- Grid: 100 x 100 (10,000 cells)
+
+📊 Dynamics:
+- Activity Score: 53.91% (Chaotic)
+- Initial density: 35%
+
+
 ## Setup
 
 Install system dependencies (Debian/Ubuntu):
