@@ -93,7 +93,7 @@ def create_video(input_folder, output_file='automata.mp4', fps=None, max_frames=
         fps = len(files) / duration
         print(f"Calculating FPS for {duration}s video: {fps:.2f} fps")
     elif fps is None:
-        fps = 60
+        fps = 30  # Reduced from 60 to 30 to save space
     
     print(f"Loading {len(files)} generations in parallel...")
     load_start = time.time()
@@ -168,7 +168,8 @@ def create_video(input_folder, output_file='automata.mp4', fps=None, max_frames=
             pass
     
     # Setup figure
-    fig, ax = plt.subplots(figsize=(7, 7))
+    # 10.8x10.8 inches at 100 DPI = 1080x1080 pixels
+    fig, ax = plt.subplots(figsize=(10.8, 10.8))
     ax.axis('off')
     
     # Create custom colormap
@@ -237,16 +238,15 @@ def create_video(input_folder, output_file='automata.mp4', fps=None, max_frames=
     print(f"Saving video to {output_file} ({fps:.2f} fps, ~{len(files)/fps:.1f}s duration)...")
     save_start = time.time()
     
-    # Configure high-quality writer
-    # - bitrate=5000: High bitrate for quality
-    # - crf=18: Visually lossless quality (lower is better)
-    # - preset=slow: Better compression efficiency
-    # - pix_fmt=yuv420p: Ensures compatibility with Telegram/QuickTime
+    # Configure writer for lighter file size (<10MB)
+    # - bitrate=1500: Target ~5.5MB for 30s video
+    # - crf=28: Higher value = more compression (standard range 18-28)
+    # - preset=veryslow: Maximum compression efficiency (takes longer to encode)
     writer = animation.FFMpegWriter(
         fps=fps,
         metadata=dict(artist='Daily Cellular Automata'),
-        bitrate=5000,
-        extra_args=['-vcodec', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'slow', '-crf', '18']
+        bitrate=1500,
+        extra_args=['-vcodec', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'veryslow', '-crf', '28']
     )
     
     anim.save(output_file, writer=writer, dpi=100)
