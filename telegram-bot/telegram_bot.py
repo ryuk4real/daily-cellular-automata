@@ -76,17 +76,14 @@ def format_caption(rule, generations, neighborhood, colors_alive, colors_dead, a
     caption = f"""**Rule:** `{rule}`
 
 📐 **Specifications:**
-• Radius: {radius}
-• States: {states} {'(binary)' if states == '2' else f'({states})'}
-• Neighborhood: {neighborhood_full} ({neighborhood_short})
-• Grid: 100×100 (10,000 cells)
+- Radius: {radius}
+- States: {states} {'(binary)' if states == '2' else f'(multi-state)'}
+- Neighborhood: {neighborhood_full} ({neighborhood_short})
+- Grid: 100 x 100 (10,000 cells)
 
 📊 **Dynamics:**
-• Activity Score: {activity} ({activity_type})
-• Initial density: 35%"""
-    
-    if seed:
-        caption += f"\n• Seed: {seed}"
+- Activity Score: {activity} ({activity_type})
+- Initial density: 35%"""
     
     return caption
 
