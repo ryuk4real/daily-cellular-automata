@@ -39,8 +39,8 @@ void generate_daily_config(Config* config, Rule* rule) {
     config->height = 150;
     
     // Generate random rule parameters
-    rule->range = random_range(1, 10);  // R1-R10 only
-    rule->states = random_range(2, 8);  // C2-C8
+    rule->range = random_range(1, 8);
+    rule->states = random_range(2, 16);
     rule->neighborhood = random_range(0, 1); // TODO: Add more type of neighbourhoods
     
     // Calculate max_neighbors

@@ -93,7 +93,7 @@ def create_video(input_folder, output_file='automata.mp4', fps=None, max_frames=
         fps = len(files) / duration
         print(f"Calculating FPS for {duration}s video: {fps:.2f} fps")
     elif fps is None:
-        fps = 30  # Reduced from 60 to 30 to save space
+        fps = 30
     
     print(f"Loading {len(files)} generations in parallel...")
     load_start = time.time()
@@ -241,7 +241,7 @@ def create_video(input_folder, output_file='automata.mp4', fps=None, max_frames=
     # Configure writer for lighter file size (<10MB)
     # - bitrate=1500: Target ~5.5MB for 30s video
     # - crf=28: Higher value = more compression (standard range 18-28)
-    # - preset=veryslow: Maximum compression efficiency (takes longer to encode)
+    # - preset=veryslow: Maximum compression efficiency
     writer = animation.FFMpegWriter(
         fps=fps,
         metadata=dict(artist='Daily Cellular Automata'),
