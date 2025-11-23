@@ -1,6 +1,6 @@
 # Daily Cellular Automata
 
-Generates unique cellular automata patterns daily using HROT notation and posts the generated video to the [Daily Cellular Automata](https://t.me/daily_cellular_automata) Telegram channel.
+Generates unique cellular automata patterns daily using HROT notation and posts the generated video to the [Daily Cellular Automata](https://t.me/daily_cellular_automata) Telegram channel using github actions.
 
 ## Post preview
 https://github.com/user-attachments/assets/c4e609ef-a91e-4f43-a8ee-4fa5b85ec16e
