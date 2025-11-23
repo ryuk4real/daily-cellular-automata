@@ -16,8 +16,8 @@ void print_help(const char* program_name) {
 }
 
 void init_default_config(Config* config) {
-    config->width = 200;
-    config->height = 200;
+    config->width = 100;
+    config->height = 100;
     config->max_generations = 500;
     config->wrap_edges = 1;
     config->init_mode = INIT_RANDOM;

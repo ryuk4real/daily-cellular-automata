@@ -98,7 +98,7 @@ Each day (12:00 CET) generates a unique rule with:
 - Random states (C2-C16)
 - Random neighborhood
 - Random survive/birth conditions (each neighbor count has 15% probability)
-- 150×150 grid, 200 generations, 35% alive cell density
+- 100x100 grid, 200 generations, 35% alive cell density
 
 Seed format: `YYYYMMDD` (20251122 = Nov 22, 2025) to reproduce the daily generated CA otherwise the seed can be any string.
 

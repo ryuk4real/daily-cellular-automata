@@ -35,8 +35,8 @@ void generate_daily_config(Config* config, Rule* rule) {
     srand(seed);
     
     // Fixed grid parameters
-    config->width = 150;
-    config->height = 150;
+    config->width = 100;
+    config->height = 100;
     
     // Generate random rule parameters
     rule->range = random_range(1, 8);

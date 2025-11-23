@@ -26,7 +26,7 @@ $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
 test: $(TARGET)
-	./$(TARGET) -r "R1,C2,S2,3,B3" -w 100 -H 100 --wrap -I center -g 500 -o output
+	./$(TARGET) -r "R1,C2,S2,3,B3" -w 100 -H 100 --wrap -I center -g 200 -o output
 
 clean:
 	rm -rf $(BIN_DIR) $(TARGET) output

@@ -24,12 +24,12 @@ void setup_game_of_life(Config* config, Rule* rule) {
     config->rule_set = strdup("R1,C2,S2,3,B3");  // Moore default, no NM needed
     
     // Test configuration
-    config->width = 200;
-    config->height = 200;
+    config->width = 100;
+    config->height = 100;
     config->wrap_edges = 1;
     config->init_mode = INIT_RANDOM;
     config->density = 0.35f;
-    config->max_generations = 500;
+    config->max_generations = 200;
     
     printf("Configuration:\n");
     printf("  Rule: %s\n", config->rule_set);

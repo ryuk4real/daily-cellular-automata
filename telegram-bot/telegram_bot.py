@@ -16,6 +16,7 @@ def parse_rule_from_logs():
             colors_alive = ""
             colors_dead = ""
             activity = "N/A"
+            seed = ""
             
             for line in lines:
                 if line.startswith("Rule:"):
@@ -30,19 +31,32 @@ def parse_rule_from_logs():
                     colors_dead = line.split(":", 1)[1].strip()
                 elif line.startswith("Activity:"):
                     activity = line.split(":", 1)[1].strip()
+                elif line.startswith("Seed:"):
+                    seed = line.split(":", 1)[1].strip()
             
-            return rule, generations, neighborhood, colors_alive, colors_dead, activity
+            return rule, generations, neighborhood, colors_alive, colors_dead, activity, seed
     
-    return "Unknown", "500", "Unknown", "#000000", "#FFFFFF", "N/A"
+    return "Unknown", "500", "Unknown", "#000000", "#FFFFFF", "N/A", ""
 
-def format_caption(rule, generations, neighborhood, colors_alive, colors_dead, activity):
-
-    # Parse neighborhood from rule
-    if "NN" in rule:
+def format_caption(rule, generations, neighborhood, colors_alive, colors_dead, activity, seed):
+    # Parse rule components
+    radius = "?"
+    states = "?"
+    
+    # Extract R (radius) and C (states)
+    r_match = re.search(r'R(\d+)', rule)
+    c_match = re.search(r'C(\d+)', rule)
+    
+    if r_match:
+        radius = r_match.group(1)
+    if c_match:
+        states = c_match.group(1)
+    
+    # Determine neighborhood name
+    if "NN" in rule or neighborhood == "Von Neumann":
         neighborhood_full = "Von Neumann"
         neighborhood_short = "NN"
     else:
-        # Default to Moore if omitted or explicitly NM
         neighborhood_full = "Moore"
         neighborhood_short = "NM"
     
@@ -59,12 +73,21 @@ def format_caption(rule, generations, neighborhood, colors_alive, colors_dead, a
     except ValueError:
         activity_type = "Unknown"
     
-    caption = f"""**Rule:** `{rule}`\n
-**Generations:** {generations}
-**Neighborhood:** {neighborhood_full} ({neighborhood_short})
-**Activity Score:** {activity} ({activity_type})
-**Colors:** {colors_alive} (alive) - {colors_dead} (dead)
-                """
+    caption = f"""**Rule:** `{rule}`
+
+📐 **Specifications:**
+• Radius: {radius}
+• States: {states} {'(binary)' if states == '2' else f'({states})'}
+• Neighborhood: {neighborhood_full} ({neighborhood_short})
+• Grid: 100×100 (10,000 cells)
+
+📊 **Dynamics:**
+• Activity Score: {activity} ({activity_type})
+• Initial density: 35%"""
+    
+    if seed:
+        caption += f"\n• Seed: {seed}"
+    
     return caption
 
 def send_video_to_telegram(bot_token, channel_id, video_path, caption):
@@ -103,10 +126,10 @@ def main():
         return
     
     # Parse rule information
-    rule, generations, neighborhood, colors_alive, colors_dead, activity = parse_rule_from_logs()
+    rule, generations, neighborhood, colors_alive, colors_dead, activity, seed = parse_rule_from_logs()
     
     # Format caption
-    caption = format_caption(rule, generations, neighborhood, colors_alive, colors_dead, activity)
+    caption = format_caption(rule, generations, neighborhood, colors_alive, colors_dead, activity, seed)
     
     print("> Posting video to Telegram...")
     print(f"Caption:\n{caption}")
