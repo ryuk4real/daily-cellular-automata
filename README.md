@@ -109,11 +109,14 @@ Only State 1 cells count as neighbors. Dying cells (State 2+) don't contribute t
 
 ## Daily Generation
 
-Each day (12:00 CET) generates a unique rule with:
+Each day (12:00 UTC) generates a unique rule with:
 - Random range (R1-R8)
 - Random states (C2-C16)
-- Random neighborhood
-- Random survive/birth conditions (each neighbor count has 15% probability)
+- Random neighborhood (Moore or Von Neumann)
+- Random survive/birth conditions generated via anchor-point sampling:
+  1. A set of random anchor points is drawn uniformly from `[0, max_neighbors]` using a [Fisher-Yates partial shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle)
+  2. The anchors are sorted, then each consecutive pair is randomly either collapsed into a range or kept as individual values
+  3. This produces an unbiased mix of single values and ranges of varying width
 - 100x100 grid, 200 generations, 35% alive cell density
 
 Seed format: `YYYYMMDD` (20251122 = Nov 22, 2025) to reproduce the daily generated CA otherwise the seed can be any string.

@@ -1,9 +1,8 @@
 name: Daily Cellular Automata
 
 on:
-  # Run 5 minutes before 12:00 CET
   schedule:
-    - cron: '55 10 * * *'
+    - cron: '55 11 * * *'
   workflow_dispatch:
 
 jobs:
@@ -32,25 +31,20 @@ jobs:
         run: |
           make daily
       
-      - name: Wait for 12:00 CET (11:00 UTC)
+      - name: Wait for 12:00 UTC
         if: github.event_name == 'schedule'
         run: |
           python3 -c "
           import time
           from datetime import datetime, timezone
-          
-          # Get current time in UTC
           now = datetime.now(timezone.utc)
-          
-          # Target time: 11:00 UTC
-          target = now.replace(hour=11, minute=0, second=0, microsecond=0)
-          
+          target = now.replace(hour=12, minute=0, second=0, microsecond=0)
           if now < target:
               sleep_seconds = (target - now).total_seconds()
-              print(f'Waiting {sleep_seconds:.2f} seconds until 11:00 UTC...')
+              print(f'Waiting {sleep_seconds:.2f} seconds until 12:00 UTC...')
               time.sleep(sleep_seconds)
           else:
-              print('Already past 11:00 UTC, proceeding.')
+              print('Already past 12:00 UTC, proceeding.')
           "
       
       - name: Post to Telegram

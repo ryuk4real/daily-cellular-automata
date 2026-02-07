@@ -19,6 +19,52 @@ static int random_range(int min, int max) {
     return min + (rand() % (max - min + 1));
 }
 
+static int compare_ints(const void* a, const void* b) {
+    return (*(int*)a - *(int*)b);
+}
+
+static void generate_conditions(uint8_t* array, int max_neighbors) {
+    int max_points = max_neighbors / 5;
+    if (max_points < 3) max_points = 3;
+    if (max_points > 15) max_points = 15;
+
+    int num_points = random_range(2, max_points);
+    if (num_points > max_neighbors + 1) num_points = max_neighbors + 1;
+
+    int* pool = malloc((max_neighbors + 1) * sizeof(int));
+    for (int i = 0; i <= max_neighbors; i++) {
+        pool[i] = i;
+    }
+
+    for (int i = 0; i < num_points; i++) {
+        int j = i + (rand() % (max_neighbors + 1 - i));
+        int tmp = pool[i];
+        pool[i] = pool[j];
+        pool[j] = tmp;
+    }
+
+    int* points = malloc(num_points * sizeof(int));
+    memcpy(points, pool, num_points * sizeof(int));
+    free(pool);
+
+    qsort(points, num_points, sizeof(int), compare_ints);
+
+    int i = 0;
+    while (i < num_points) {
+        if (i + 1 < num_points && random_range(0, 1)) {
+            for (int j = points[i]; j <= points[i + 1]; j++) {
+                array[j] = 1;
+            }
+            i += 2;
+        } else {
+            array[points[i]] = 1;
+            i++;
+        }
+    }
+
+    free(points);
+}
+
 void generate_daily_config(Config* config, Rule* rule) {
     unsigned int seed;
     
@@ -41,7 +87,7 @@ void generate_daily_config(Config* config, Rule* rule) {
     // Generate random rule parameters
     rule->range = random_range(1, 8);
     rule->states = random_range(2, 16);
-    rule->neighborhood = random_range(0, 1); // TODO: Add more type of neighbourhoods
+    rule->neighborhood = random_range(0, 1);
     
     // Calculate max_neighbors
     int max_neighbors;
@@ -53,22 +99,13 @@ void generate_daily_config(Config* config, Rule* rule) {
     
     memset(rule->survive, 0, sizeof(rule->survive));
     memset(rule->birth, 0, sizeof(rule->birth));
+
+    generate_conditions(rule->survive, max_neighbors);
+    generate_conditions(rule->birth, max_neighbors);
     
-    // Generate rules
-    for (int i = 0; i <= max_neighbors; i++) {
-        if (random_range(1, 100) <= 15) {
-            rule->survive[i] = 1;
-        }
-        if (random_range(1, 100) <= 15) {
-            rule->birth[i] = 1;
-        }
-    }
-    
-    // Build rule string - use large fixed buffer
-    char rule_str[4096];  // Large fixed buffer
+    char rule_str[4096];
     int pos = snprintf(rule_str, sizeof(rule_str), "R%d,C%d,S", rule->range, rule->states);
-    
-    // Write survival rules
+
     int first = 1;
     for (int i = 0; i <= max_neighbors && pos < 4000; i++) {
         if (rule->survive[i]) {
@@ -78,13 +115,10 @@ void generate_daily_config(Config* config, Rule* rule) {
             
             int start = i;
             int end = i;
-            
-            // Find consecutive values
             while (end + 1 <= max_neighbors && rule->survive[end + 1]) {
                 end++;
             }
-            
-            // Write range or single value
+
             if (end > start) {
                 pos += snprintf(rule_str + pos, sizeof(rule_str) - pos, "%d-%d", start, end);
             } else {
@@ -97,8 +131,7 @@ void generate_daily_config(Config* config, Rule* rule) {
     }
     
     pos += snprintf(rule_str + pos, sizeof(rule_str) - pos, ",B");
-    
-    // Write birth rules
+
     first = 1;
     for (int i = 0; i <= max_neighbors && pos < 4000; i++) {
         if (rule->birth[i]) {
@@ -108,13 +141,10 @@ void generate_daily_config(Config* config, Rule* rule) {
             
             int start = i;
             int end = i;
-            
-            // Find consecutive values
             while (end + 1 <= max_neighbors && rule->birth[end + 1]) {
                 end++;
             }
-            
-            // Write range or single value
+
             if (end > start) {
                 pos += snprintf(rule_str + pos, sizeof(rule_str) - pos, "%d-%d", start, end);
             } else {
@@ -125,16 +155,13 @@ void generate_daily_config(Config* config, Rule* rule) {
             first = 0;
         }
     }
-    
-    // Add neighborhood
+
     if (rule->neighborhood == 1) {
         pos += snprintf(rule_str + pos, sizeof(rule_str) - pos, ",NN");
     }
-    
-    // Duplicate string for config
+
     config->rule_set = strdup(rule_str);
-    
-    // Fixed parameters
+
     config->wrap_edges = 1;
     config->init_mode = INIT_RANDOM;
     config->density = 0.35f;
@@ -147,9 +174,7 @@ void generate_daily_config(Config* config, Rule* rule) {
            rule->neighborhood == 0 ? "Moore" : "Von Neumann");
     printf("Grid: %dx%d, Generations: %d\n\n", 
            config->width, config->height, config->max_generations);
-    
-    // Save rule info to file for Telegram bot
-    // Ensure output folder exists
+
     mkdir(config->output_folder, 0755);
     
     char info_path[512];
