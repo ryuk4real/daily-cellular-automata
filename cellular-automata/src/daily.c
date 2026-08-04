@@ -87,14 +87,24 @@ void generate_daily_config(Config* config, Rule* rule) {
     // Generate random rule parameters
     rule->range = random_range(1, 8);
     rule->states = random_range(2, 16);
-    rule->neighborhood = random_range(0, 1);
+    rule->neighborhood = random_range(0, 2);
     
     // Calculate max_neighbors
-    int max_neighbors;
+    int max_neighbors = 0;
     if (rule->neighborhood == 0) {
         max_neighbors = (2 * rule->range + 1) * (2 * rule->range + 1) - 1;
-    } else {
+    } else if (rule->neighborhood == 1) {
         max_neighbors = 2 * rule->range * (rule->range + 1);
+    } else if (rule->neighborhood == 2) {
+        int r_sq = rule->range * rule->range;
+        for (int dy = -rule->range; dy <= rule->range; dy++) {
+            for (int dx = -rule->range; dx <= rule->range; dx++) {
+                if (dx == 0 && dy == 0) continue;
+                if (dx * dx + dy * dy <= r_sq) {
+                    max_neighbors++;
+                }
+            }
+        }
     }
     
     memset(rule->survive, 0, sizeof(rule->survive));
@@ -158,6 +168,8 @@ void generate_daily_config(Config* config, Rule* rule) {
 
     if (rule->neighborhood == 1) {
         pos += snprintf(rule_str + pos, sizeof(rule_str) - pos, ",NN");
+    } else if (rule->neighborhood == 2) {
+        pos += snprintf(rule_str + pos, sizeof(rule_str) - pos, ",NC");
     }
 
     config->rule_set = strdup(rule_str);
@@ -167,11 +179,14 @@ void generate_daily_config(Config* config, Rule* rule) {
     config->density = 0.35f;
     config->max_generations = 200;
     
+    const char* nbr_name = "Moore";
+    if (rule->neighborhood == 1) nbr_name = "Von Neumann";
+    else if (rule->neighborhood == 2) nbr_name = "Circular";
+
     printf("\n> Generated Daily Rule\n");
     printf("Rule: %s\n\n", config->rule_set);
     printf("Range: %d, States: %d, Neighborhood: %s\n", 
-           rule->range, rule->states, 
-           rule->neighborhood == 0 ? "Moore" : "Von Neumann");
+           rule->range, rule->states, nbr_name);
     printf("Grid: %dx%d, Generations: %d\n\n", 
            config->width, config->height, config->max_generations);
 
@@ -185,8 +200,7 @@ void generate_daily_config(Config* config, Rule* rule) {
         fprintf(info_file, "Seed: %u\n", seed);
         fprintf(info_file, "Rule: %s\n", config->rule_set);
         fprintf(info_file, "Generations: %d\n", config->max_generations);
-        fprintf(info_file, "Neighborhood: %s\n", 
-                rule->neighborhood == 0 ? "Moore" : "Von Neumann");
+        fprintf(info_file, "Neighborhood: %s\n", nbr_name);
         fclose(info_file);
     }
 }

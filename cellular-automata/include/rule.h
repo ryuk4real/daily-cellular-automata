@@ -11,7 +11,7 @@ typedef struct {
     int states;             // C value
     uint8_t survive[MAX_COUNTS];  // Survival counts (1 = survives)
     uint8_t birth[MAX_COUNTS];    // Birth counts (1 = births)
-    int neighborhood;       // N value (0=Moore, 1=von Neumann, 2=Hexagonal)
+    int neighborhood;       // N value (0=Moore, 1=von Neumann, 2=Circular)
 } Rule;
 
 // Parse HROT notation rule string

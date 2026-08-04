@@ -18,6 +18,10 @@ static inline int count_neighbors(const Grid* grid, int x, int y, int range, int
             if (neighborhood == 1) {
                 if (abs(dx) + abs(dy) > range) continue;  // This creates rhombus shape
             }
+            // Circular neighborhood: Euclidean distance <= range
+            else if (neighborhood == 2) {
+                if (dx * dx + dy * dy > range * range) continue;
+            }
             
             int nx = x + dx;
             int ny = y + dy;

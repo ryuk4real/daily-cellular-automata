@@ -53,7 +53,10 @@ def format_caption(rule, generations, neighborhood, colors_alive, colors_dead, a
         states = c_match.group(1)
     
     # Determine neighborhood name
-    if "NN" in rule or neighborhood == "Von Neumann":
+    if "NC" in rule or neighborhood == "Circular":
+        neighborhood_full = "Circular"
+        neighborhood_short = "NC"
+    elif "NN" in rule or neighborhood == "Von Neumann":
         neighborhood_full = "Von Neumann"
         neighborhood_short = "NN"
     else:

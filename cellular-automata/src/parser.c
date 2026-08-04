@@ -12,6 +12,7 @@ void print_help(const char* program_name) {
     printf("  -D, --daily                Generate daily random configuration (today)\n");
     printf("  -s, --seed [YYMMDD]        Use specific date seed (e.g., 251122)\n");
     printf("  -t, --test                 Run Conway's Game of Life test\n");
+    printf("  -c, --test-circular        Run circular neighborhood (NC) test\n");
     printf("  -h, --help                 Show this help message\n");
 }
 
@@ -52,18 +53,21 @@ int parse_arguments(int argc, char** argv, Config* config) {
     }
     
     static struct option long_options[] = {
-        {"daily",  no_argument,       0, 'D'},
-        {"seed",   required_argument, 0, 's'},
-        {"test",   no_argument,       0, 't'},
-        {"help",   no_argument,       0, 'h'},
+        {"daily",          no_argument,       0, 'D'},
+        {"seed",           required_argument, 0, 's'},
+        {"test",           no_argument,       0, 't'},
+        {"test-circular",  no_argument,       0, 'c'},
+        {"test_circular",  no_argument,       0, 'c'},
+        {"help",           no_argument,       0, 'h'},
         {0, 0, 0, 0}
     };
     
     int option_index = 0;
     int c;
     int test_mode = 0;
+    int test_circular_mode = 0;
     
-    while ((c = getopt_long(argc, argv, "Ds:th", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "Ds:tch", long_options, &option_index)) != -1) {
         switch (c) {
             case 'D':
                 return 2; // Daily mode
@@ -72,6 +76,9 @@ int parse_arguments(int argc, char** argv, Config* config) {
                 return 2; // Daily mode with specific seed
             case 't':
                 test_mode = 1;
+                break;
+            case 'c':
+                test_circular_mode = 1;
                 break;
             case 'h':
                 print_help(argv[0]);
@@ -85,6 +92,9 @@ int parse_arguments(int argc, char** argv, Config* config) {
     
     if (test_mode) {
         return 3; // Test mode (Game of Life)
+    }
+    if (test_circular_mode) {
+        return 4; // Test mode (Circular NC)
     }
     
     return 2; // Default to daily mode

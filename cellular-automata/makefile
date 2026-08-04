@@ -11,7 +11,7 @@ OBJECTS = $(BIN_DIR)/main.o $(BIN_DIR)/parser.o $(BIN_DIR)/rule.o $(BIN_DIR)/gri
 HEADERS = $(INC_DIR)/config.h $(INC_DIR)/parser.h $(INC_DIR)/rule.h $(INC_DIR)/grid.h $(INC_DIR)/automata.h $(INC_DIR)/daily.h
 TARGET = cellular_automata
 
-.PHONY: all clean test help
+.PHONY: all clean test test_circular help
 
 all: $(TARGET)
 
@@ -26,16 +26,20 @@ $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
 test: $(TARGET)
-	./$(TARGET) -r "R1,C2,S2,3,B3" -w 100 -H 100 --wrap -I center -g 200 -o output
+	./$(TARGET) --test
+
+test_circular: $(TARGET)
+	./$(TARGET) --test-circular
 
 clean:
-	rm -rf $(BIN_DIR) $(TARGET) output
+	rm -rf $(BIN_DIR) $(TARGET) output output_circular
 
 help:
 	@echo "Cellular Automata Makefile"
 	@echo ""
 	@echo "Targets:"
-	@echo "  make           - Compile the program"
-	@echo "  make clean     - Remove compiled files and output"
-	@echo "  make test      - Run test simulation"
-	@echo "  make help      - Show this help"
+	@echo "  make               - Compile the program"
+	@echo "  make clean         - Remove compiled files and output"
+	@echo "  make test          - Run test simulation"
+	@echo "  make test_circular - Run test simulation with circular neighborhood (NC)"
+	@echo "  make help          - Show this help"

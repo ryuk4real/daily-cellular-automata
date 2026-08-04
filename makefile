@@ -1,4 +1,4 @@
-.PHONY: build daily test video clean
+.PHONY: build daily test test_circular video clean
 
 build:
 	cd cellular-automata && $(MAKE)
@@ -24,6 +24,13 @@ test: build
 	@echo ""
 	@python3 visualization/render_video.py output test.mp4 30
 
+# Test mode - Circular Neighborhood (NC)
+test_circular: build
+	@echo "> Testing with Circular Neighborhood (NC)"
+	@./cellular-automata/cellular_automata --test-circular
+	@echo ""
+	@python3 visualization/render_video.py output test_circular.mp4 30
+
 clean:
 	cd cellular-automata && $(MAKE) clean
-	rm -rf output *.mp4
+	rm -rf output output_circular *.mp4

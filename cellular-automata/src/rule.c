@@ -37,25 +37,37 @@ int parse_rule(const char* rule_string, Rule* rule) {
     char* str = strdup(rule_string);
     char* token;
     char* saveptr;
+    char current_mode = 0; // 'S' or 'B'
     
     token = strtok_r(str, ",", &saveptr);
     while (token != NULL) {
         if (token[0] == 'R') {
             rule->range = atoi(token + 1);
+            current_mode = 0;
         } else if (token[0] == 'C') {
             rule->states = atoi(token + 1);
+            current_mode = 0;
         } else if (token[0] == 'S') {
+            current_mode = 'S';
             parse_list(token + 1, rule->survive);
         } else if (token[0] == 'B') {
+            current_mode = 'B';
             parse_list(token + 1, rule->birth);
         } else if (token[0] == 'N') {
+            current_mode = 0;
             if (token[1] == 'M') {
                 rule->neighborhood = 0; // Moore
             } else if (token[1] == 'N') {
                 rule->neighborhood = 1; // Von Neumann
+            } else if (token[1] == 'C') {
+                rule->neighborhood = 2; // Circular
             } else {
                 rule->neighborhood = atoi(token + 1);
             }
+        } else if (current_mode == 'S') {
+            parse_list(token, rule->survive);
+        } else if (current_mode == 'B') {
+            parse_list(token, rule->birth);
         }
         token = strtok_r(NULL, ",", &saveptr);
     }

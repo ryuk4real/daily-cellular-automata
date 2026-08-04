@@ -88,6 +88,7 @@ Rr,Cc,Slist,Blist,Nn
 - **Nn**: Extended neighborhood type (optional)
   - Omitted = Moore (default, square, all 8 directions)
   - `NN` = Von Neumann (diamond, 4 cardinal directions)
+  - `NC` = Circular (circle of radius R)
 
 ### Examples:
 
@@ -161,7 +162,7 @@ Checklist of additional neighborhoods to implement (based on [Larger than Life (
 
 - [x] Moore (NM)
 - [x] Von Neumann (NN)
-- [ ] Circular (NC)
+- [x] Circular (NC)
 - [ ] L2/Euclidean (N2)
 - [ ] Checkerboard (NB)
 - [ ] Aligned Checkerboard (ND)
