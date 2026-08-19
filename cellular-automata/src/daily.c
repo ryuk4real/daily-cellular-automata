@@ -23,6 +23,10 @@ static int compare_ints(const void* a, const void* b) {
     return (*(int*)a - *(int*)b);
 }
 
+static inline int circular_neighbor_limit(int range) {
+    return range * (range + 1);
+}
+
 static void generate_conditions(uint8_t* array, int max_neighbors) {
     int max_points = max_neighbors / 5;
     if (max_points < 3) max_points = 3;
@@ -96,11 +100,11 @@ void generate_daily_config(Config* config, Rule* rule) {
     } else if (rule->neighborhood == 1) {
         max_neighbors = 2 * rule->range * (rule->range + 1);
     } else if (rule->neighborhood == 2) {
-        int r_sq = rule->range * rule->range;
+        int limit = circular_neighbor_limit(rule->range);
         for (int dy = -rule->range; dy <= rule->range; dy++) {
             for (int dx = -rule->range; dx <= rule->range; dx++) {
                 if (dx == 0 && dy == 0) continue;
-                if (dx * dx + dy * dy <= r_sq) {
+                if (dx * dx + dy * dy <= limit) {
                     max_neighbors++;
                 }
             }

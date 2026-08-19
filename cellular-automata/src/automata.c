@@ -5,6 +5,10 @@
 #include <omp.h>
 #include "automata.h"
 
+static inline int circular_neighbor_limit(int range) {
+    return range * (range + 1);
+}
+
 static inline int count_neighbors(const Grid* grid, int x, int y, int range, int wrap, int neighborhood) {
     int count = 0;
     int w = grid->width;
@@ -18,9 +22,9 @@ static inline int count_neighbors(const Grid* grid, int x, int y, int range, int
             if (neighborhood == 1) {
                 if (abs(dx) + abs(dy) > range) continue;  // This creates rhombus shape
             }
-            // Circular neighborhood: Euclidean distance <= range
+            // Circular neighborhood: x^2 + y^2 <= r(r+1)
             else if (neighborhood == 2) {
-                if (dx * dx + dy * dy > range * range) continue;
+                if (dx * dx + dy * dy > circular_neighbor_limit(range)) continue;
             }
             
             int nx = x + dx;

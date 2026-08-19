@@ -88,7 +88,7 @@ Rr,Cc,Slist,Blist,Nn
 - **Nn**: Extended neighborhood type (optional)
   - Omitted = Moore (default, square, all 8 directions)
   - `NN` = Von Neumann (diamond, 4 cardinal directions)
-  - `NC` = Circular (circle of radius R)
+  - `NC` = Circular, using the Golly/MCell threshold $x^2 + y^2 \le r(r+1)$
 
 ### Examples:
 
@@ -113,7 +113,7 @@ Only State 1 cells count as neighbors. Dying cells (State 2+) don't contribute t
 Each day (12:00 UTC) generates a unique rule with:
 - Random range (R1-R8)
 - Random states (C2-C16)
-- Random neighborhood (Moore or Von Neumann)
+- Random neighborhood (Moore, Von Neumann, or Circular)
 - Random survive/birth conditions generated via anchor-point sampling:
   1. A set of random anchor points is drawn uniformly from `[0, max_neighbors]` using a [Fisher-Yates partial shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle)
   2. The anchors are sorted, then each consecutive pair is randomly either collapsed into a range or kept as individual values
